@@ -1,0 +1,160 @@
+﻿@using PostMateApp.Core.Application.ViewModels.User;
+@using PostMateApp.Core.Application.ViewModels.Post;
+@using PostMateApp.Core.Application.ViewModels.Comment;
+@using PostMateApp.Core.Application.ViewModels.Reply;
+
+@{
+    ViewData["Title"] = "Amigos";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-3 offset-9">
+            <a asp-controller="Friend" asp-action="AddFriend" class="btn btn-warning bg-gradient float-end">Agrega un nuevo Amigo</a>
+        </div>
+    </div>
+    <div class="row mb-3 custom-primary-color bg-gradient rounded p-4">
+        <aside class="col-3">
+            <h2 class="display-6 font-monospace">amigos</h2>
+            @foreach (UserViewModel friend in ViewBag.Friends)
+            {
+                <div id="alert-@friend.Id" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+                    <p>¿Desea eliminar a @friend.Username de sus amistades?</p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <form method="post" asp-controller="Friend" asp-action="Delete" class="mb-2">
+                        <input type="hidden" name="id" value="@friend.Id" />
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="d-flex">
+                        <div class="p-0">
+                            <img class="w-100 h-100" src="@friend.ProfileImg" alt="Profile Image">
+                        </div>
+                        <div class="p-4">
+                            <div class="m-2">
+                                <p class="fw-bold mt-1 p-0">@friend.Username</p>
+                                <p class="p-0">@friend.Firstname @friend.Lastname</p>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <a class="btn btn-sm btn-danger m-2" onclick="showAlert('@friend.Id')">Eliminar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </aside>
+        <main class="col-8">
+            @foreach (PostViewModel post in ViewBag.FriendsPosts)
+            {
+                bool textPost = post.VideoUrl == null ? post.ImageUrl == null ? true : false : false;
+                bool imagePost = post.ImageUrl != null ? post.VideoUrl == null : false;
+                bool videoPost = post.VideoUrl != null ? post.ImageUrl == null : false;
+
+                <div class="card text-dark mb-4  box-shadow flex-fill">
+                    @if (imagePost)
+                    {
+                        <img class="post-media card-img-top" src="@post.ImageUrl" />
+                    }
+                    else if (videoPost)
+                    {
+                        <iframe src="@post.VideoUrl" title="@post.Text" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="post-media card-img-top"></iframe>
+                    }
+
+                    <div class="card-body d-flex flex-column flex-fill">
+                        <div class="d-flex align-items-center">
+                            <img class="rounded-circle shadow-1-strong me-3"
+                                 src="@post.UserProfileImg" alt="avatar" width="65"
+                                 height="65" />
+                            <div>
+                                <p class="text-dark fw-bold">@post.Username</p>
+                                <p class="small">@post.PublicationDate</p>
+                                <p class="card-text">@post.Text</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        @foreach (CommentViewModel comment in post.Comments)
+                        {
+                            <div class="row m-2">
+                                <div class="col">
+                                    <div class="d-flex flex-star">
+                                        <img class="rounded-circle shadow-1-strong me-3"
+                                             src="@comment.UserProfileImg" alt="avatar" width="65"
+                                             height="65" />
+                                        <div class="flex-grow-1 flex-shrink-1">
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="mb-1">
+                                                        <strong>@comment.Username</strong><span class="small"> - @comment.PublicationDate</span>
+                                                        <p>@comment.Text</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @foreach (ReplyViewModel reply in comment.Replies)
+                                            {
+                                                <div class="d-flex flex-start mt-4">
+                                                    <a class="me-3" href="#">
+                                                        <img class="rounded-circle shadow-1-strong"
+                                                             src="@reply.UserProfileImg" alt="avatar"
+                                                             width="55" height="55" />
+                                                    </a>
+                                                    <div class="flex-grow-1 flex-shrink-1">
+                                                        <div>
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <p class="mb-1">
+                                                                    <strong>@reply.Username</strong><span class="small"> - @reply.PublicationDate</span>
+                                                                </p>
+                                                            </div>
+                                                            <p class="small mb-0">
+                                                                @reply.Text
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="p-2">
+                                        <form asp-controller="Reply" asp-action="Create" method="post" class="m-4">
+                                            <div class="d-flex flex-row align-items-start">
+                                                <textarea class="form-control box-shadow" rows="2" name="text" placeholder="Responde a este comentario"></textarea>
+                                            </div>
+                                            <input type="hidden" name="redirectController" value="Home" />
+                                            <input type="hidden" name="commentId" value="@comment.Id" />
+                                            <div class="d-flex justify-content-end mt-2">
+                                                <button type="submit" class="btn btn-warning">Responder</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="row">
+                        <div class="column">
+                            <div class="p-4">
+                                <form asp-controller="Comment" asp-action="Create" method="post" class="m-2">
+                                    <div class="d-flex flex-row align-items-start">
+                                        <textarea class="form-control box-shadow" name="text" placeholder="Escribe un comentario"></textarea>
+                                    </div>
+                                    <input type="hidden" name="redirectController" value="Home" />
+                                    <input type="hidden" name="postId" value="@post.Id" />
+                                    <div class="d-flex justify-content-end mt-2">
+                                        <button type="submit" class="btn btn-warning">Comentar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </main>
+    </div>
+</div>

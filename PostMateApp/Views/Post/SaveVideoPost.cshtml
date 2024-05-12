@@ -1,0 +1,46 @@
+﻿@using PostMateApp.Core.Application.ViewModels.Post;
+@model SavePostViewModel;
+
+@{
+        ViewData["Title"] = "Editar Post";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6 offset-3">
+            <div class="card border-0 rounded-3">
+                <div class="card-header bg-warning bg-gradient text-black p-2">
+                    <h4 class="m-2 display-6 text-black">Editar Post de Video</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-controller="Post" asp-action="EditVideoPost">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="VideoUrl" class="form-label text-dark fw-bold">Enlace del video</label>
+                            <input type="text" asp-for="VideoUrl" class="form-control" />
+                            <span asp-validation-for="VideoUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Text" class="form-label custom-dark-color fw-bold">Caption</label>
+                                <input rows="4" asp-for="Text" class="form-control"/>
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                        </div>
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="PublicationDate" value="@(Model.PublicationDate == DateTime.MinValue ? DateTime.Now : Model.PublicationDate)" />
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-dark m-2">Volver atrás</a>
+                            <button type="submit" class="btn btn-warning m-2">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

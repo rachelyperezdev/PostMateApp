@@ -1,0 +1,237 @@
+﻿@using PostMateApp.Core.Application.ViewModels.Post;
+@using PostMateApp.Core.Application.ViewModels.Comment;
+@using PostMateApp.Core.Application.ViewModels.Reply;
+@model SavePostViewModel;
+
+@{
+    ViewData["Title"] = "Mis Publicaciones";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <p>Crea un nuevo post y elige el tipo haciendo clic en los botones dentro del menú con pestañas.</p>
+
+        <div class="tab register-bg-color">
+            <button class="tablinks" onclick="openTab(event, 'Text')">Texto</button>
+            <button class="tablinks" onclick="openTab(event, 'Image')">Imagen</button>
+            <button class="tablinks" onclick="openTab(event, 'Video')">Video</button>
+        </div>
+
+        <div id="Text" class="tabcontent">
+            <form method="post" asp-controller="Post" asp-action="CreateTextPost">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+                }
+                <div class="mb-3">
+                    <label asp-for="Text" class="form-label fw-bold">Contenido</label>
+                    <textarea required rows="4" asp-for="Text" class="form-control"></textarea>
+                    <span asp-validation-for="Text" class="text-danger"></span>
+                </div>
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="PublicationDate" value="@(Model.PublicationDate == DateTime.MinValue ? DateTime.Now : Model.PublicationDate)" />
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-warning m-2">Guardar</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="Image" class="tabcontent">
+            <form method="post" asp-controller="Post" asp-action="CreateImagePost" enctype="multipart/form-data">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+                }
+                <div class="mb-3">
+                    <label asp-for="File" class="form-label fw-bold">Seleccione una imagen:</label>
+                    <input required asp-for="File" class="form-control" />
+                    <span asp-validation-for="File" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Text" class="form-label custom-dark-color fw-bold">Caption</label>
+                    <input rows="4" asp-for="Text" class="form-control" />
+                    <span asp-validation-for="Text" class="text-danger"></span>
+                </div>
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="PublicationDate" value="@(Model.PublicationDate == DateTime.MinValue ? DateTime.Now : Model.PublicationDate)" />
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-warning m-2">Guardar</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="Video" class="tabcontent">
+            <form method="post" asp-controller="Post" asp-action="CreateVideoPost">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+                }
+
+                <div class="mb-3">
+                    <label asp-for="VideoUrl" class="form-label fw-bold">Enlace del video</label>
+                    <input required type="text" asp-for="VideoUrl" class="form-control" />
+                    <span asp-validation-for="VideoUrl" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Text" class="form-label fw-bold">Caption</label>
+                    <input rows="4" asp-for="Text" class="form-control" />
+                    <span asp-validation-for="Text" class="text-danger"></span>
+                </div>
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="PublicationDate" value="@(Model.PublicationDate == DateTime.MinValue ? DateTime.Now : Model.PublicationDate)" />
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-warning m-2">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row mb-3 justify-content-center align-items-center">
+    <div class="col-md-6">
+        @if (ViewBag.Posts == null)
+        {
+            <h2 class="text-dark">No ha publicado ningún post.</h2>
+            <p class="lead">
+                Comparte con tus amigos.
+            </p>
+        }
+        else
+        {
+            <div class="d-flex flex-column">
+                @foreach (PostViewModel post in ViewBag.Posts)
+                {
+                    bool textPost = post.VideoUrl == null ? post.ImageUrl == null ? true : false : false;
+                    bool imagePost = post.ImageUrl != null ? post.VideoUrl == null : false;
+                    bool videoPost = post.VideoUrl != null ? post.ImageUrl == null : false;
+
+                    <div class="card text-dark mb-4  box-shadow flex-fill">
+
+                        <div id="alert-@post.Id" class="alert alert-danger alert-dismissible fade show" role="alert" style="display:none;">
+                            <p>¿Desea eliminar este post?</p>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <form method="post" asp-controller="Post" asp-action="Delete" class="mb-2">
+                                <input type="hidden" name="id" value="@post.Id" />
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </div>
+
+                        @if (imagePost)
+                        {
+                            <img class="post-media card-img-top" src="@post.ImageUrl" />
+                        }
+                        else if (videoPost)
+                        {
+                            <iframe src="@post.VideoUrl" title="@post.Text" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="post-media card-img-top"></iframe>
+                        }
+
+                        <div class="card-body d-flex flex-column flex-fill">
+                            <div class="d-flex align-items-center">
+                                    <img class="rounded-circle shadow-1-strong me-3"
+                                         src="@post.UserProfileImg" alt="avatar" width="65"
+                                         height="65" />
+                                <div>
+                                    <p class="text-dark fw-bold">@post.Username</p>
+                                    <p class="small">@post.PublicationDate</p>
+                                    <p class="card-text">@post.Text</p>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <a asp-controller="Post" asp-action="@(textPost ? "EditTextPost" : imagePost ? "EditImagePost" : "EditVideoPost")" asp-route-id="@post.Id" class="btn btn-sm btn-outline-warning m-2">Editar</a>
+                                <a class="btn btn-sm btn-outline-danger m-2" onclick="showAlert('@post.Id')">Eliminar</a>
+                            </div>
+                        </div>
+                        <div>
+                            @foreach (CommentViewModel comment in post.Comments)
+                            {
+                                <div class="row m-2">
+                                    <div class="col">
+                                        <div class="d-flex flex-star">
+                                                    <img class="rounded-circle shadow-1-strong me-3"
+                                                         src="@comment.UserProfileImg" alt="avatar" width="65"
+                                                         height="65" />
+                                                    <div class="flex-grow-1 flex-shrink-1">
+                                                        <div>
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div class="mb-1">
+                                                                    <strong>@comment.Username</strong><span class="small"> - @comment.PublicationDate</span>
+                                                                    <p>@comment.Text</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        @foreach (ReplyViewModel reply in comment.Replies)
+                                                        {
+                                                            <div class="d-flex flex-start mt-4">
+                                                                <a class="me-3" href="#">
+                                                                    <img class="rounded-circle shadow-1-strong"
+                                                                         src="@reply.UserProfileImg" alt="avatar"
+                                                                         width="55" height="55" />
+                                                                </a>
+                                                                <div class="flex-grow-1 flex-shrink-1">
+                                                                    <div>
+                                                                        <div class="d-flex justify-content-between align-items-center">
+                                                                            <p class="mb-1">
+                                                                                <strong>@reply.Username</strong><span class="small"> - @reply.PublicationDate</span>
+                                                                            </p>
+                                                                        </div>
+                                                                        <p class="small mb-0">
+                                                                            @reply.Text
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="p-2">
+                                                    <form asp-controller="Reply" asp-action="Create" method="post" class="m-4">
+                                                        <div class="d-flex flex-row align-items-start">
+                                                            <img class="rounded-circle m-2" src="@post.UserProfileImg" width="45" height="45">
+                                                            <textarea class="form-control box-shadow" rows="2" name="text" placeholder="Responde a este comentario"></textarea>
+                                                        </div>
+                                                        <input type="hidden" name="redirectController" value="Home" />
+                                                        <input type="hidden" name="commentId" value="@comment.Id" />
+                                                        <div class="d-flex justify-content-end mt-2">
+                                                            <button type="submit" class="btn btn-warning">Responder</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                            }
+                        </div>
+                        <div class="row">
+                            <div class="column">
+                                <div class="p-4">
+                                    <form asp-controller="Comment" asp-action="Create" method="post" class="m-2">
+                                        <div class="d-flex flex-row align-items-start">
+                                            <img class="rounded-circle m-2" src="@post.UserProfileImg" width="45" height="45">
+                                            <textarea class="form-control box-shadow" name="text" placeholder="Escribe un comentario"></textarea>
+                                        </div>
+                                        <input type="hidden" name="redirectController" value="Home" />
+                                        <input type="hidden" name="postId" value="@post.Id" />
+                                        <div class="d-flex justify-content-end mt-2">
+                                        <button type="submit" class="btn btn-warning">Comentar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

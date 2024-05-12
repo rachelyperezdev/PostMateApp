@@ -1,0 +1,18 @@
+﻿@using PostMateApp.Core.Application.ViewModels.User;
+@model List<UserViewModel>;
+@{
+    ViewData["Title"] = "Agregar Amigos";
+}
+
+<div class="container-fluid">
+    <div class="row m-3">
+        <form method="post" asp-controller="Friend" asp-action="AddFriend" class="d-flex justify-content-center">
+            <input required class="form-control mr-2 text-dark bg-secondary bg-opacity-10 border-0 rounded-0 shadow" type="text" name="username" placeholder="Buscar amigo por su nombre de usuario" />
+            <button class="btn btn-warning rounded-0 shadow" type="submit">Buscar</button>
+        </form>
+    </div>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+    }
+</div>
