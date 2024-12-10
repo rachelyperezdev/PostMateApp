@@ -73,7 +73,7 @@ Follow these instructions to set up the project locally.
 
 - [.NET 7 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 - [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-- * [Visual Studio](https://visualstudio.microsoft.com/) or any preferred IDE for [ASP.NET](http://asp.net/) Core development
+- [Visual Studio](https://visualstudio.microsoft.com/) or any preferred IDE for [ASP.NET](http://asp.net/) Core development
 
 ### Installation
 
